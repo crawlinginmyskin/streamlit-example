@@ -2,37 +2,35 @@ from collections import namedtuple
 import altair as alt
 import math
 import pandas as pd
+import datetime as dt
 import streamlit as st
+import importlib
+import matplotlib.pyplot as plt
+from funkcje import obrobka_df, load_models,podsumowanie, rysuj
 
 """
-# Welcome to Streamlit!
+# Regresja
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
-
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
-
-In the meantime, below is an example of what you can do with just a few lines of code:
 """
 
 
 with st.echo(code_location='below'):
-    total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-    num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
-
-    Point = namedtuple('Point', 'x y')
-    data = []
-
-    points_per_turn = total_points / num_turns
-
-    for curr_point_num in range(total_points):
-        curr_turn, i = divmod(curr_point_num, points_per_turn)
-        angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-        radius = curr_point_num / total_points
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        data.append(Point(x, y))
-
-    st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-        .mark_circle(color='#0068c9', opacity=0.5)
-        .encode(x='x:Q', y='y:Q'))
+	data = st.date_input('Wybierz dzień do obserwacji', value=dt.date(2021, 9, 1), min_value=dt.date(2021, 9, 1),
+	                     max_value=dt.date(2021,9,30))
+	data_str = str(data.year) + '-'
+	if data.month < 10:
+		data_str += '0'+str(data.month)+'-'
+	else:
+		data_str += str(data.month)+'-'
+		
+	if data.day < 10:
+		data_str += '0'+str(data.day)
+	else:
+		data_str += str(data.day)
+	st.write(data_str)
+	#x_train, x_test, y_train, y_test, time_slices = obrobka_df('C:\\Users\\FilipZiętara\\Desktop\\dashboard\\streamlit-example\\godziny.csv')
+	x_train, x_test, y_train, y_test, time_slices = obrobka_df('godziny.csv')
+	regs = load_models(x_train, y_train)
+	st.write(podsumowanie(x_test, y_test, regs))
+	preds = [i.predict(x_test) for i in regs]
+	rysuj(y_test, preds, data_str, time_slices)
