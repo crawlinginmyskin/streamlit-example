@@ -1,11 +1,5 @@
-from collections import namedtuple
-import altair as alt
-import math
-import pandas as pd
 import datetime as dt
 import streamlit as st
-import importlib
-import matplotlib.pyplot as plt
 from funkcje import obrobka_df, load_models,podsumowanie, rysuj
 
 """
