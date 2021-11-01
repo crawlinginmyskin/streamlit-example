@@ -68,6 +68,8 @@ def wykres_x(x_test, df_t, d):
 			plt.title(n + ' w dniu ' + d)
 	st.pyplot(fig)
 	return None
+
+
 def obrobka_df(filename):
 	# doprowadzenie df do plottable wersji
 	df = pd.read_csv(filename, index_col=0)
@@ -134,7 +136,6 @@ def obrobka_df(filename):
 
 def load_models(x_train, y_train):
 	return [LinearRegression().fit(x_train, y_train[i]) for i in y_train.columns]
-
 
 
 def podsumowanie(x_test, y_test, regs):

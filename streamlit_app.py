@@ -1,14 +1,15 @@
 import datetime as dt
 import streamlit as st
-from funkcje import obrobka_df, load_models,podsumowanie, wykres_y, wykres_x
+from funkcje import obrobka_df, load_models, podsumowanie, wykres_y, wykres_x
+from PIL import Image
 
 st.set_page_config(layout='wide')
 """
 # Regresja
 
 """
-
-st.image('tramwaj.png')
+image = Image.open('tramwaj.png')
+st.image(image)
 data = st.date_input('Wybierz dzień do obserwacji', value=dt.date(2021, 9, 1), min_value=dt.date(2021, 9, 1),
 	                    max_value=dt.date(2021,9,30))
 data_str = str(data.year) + '-'
