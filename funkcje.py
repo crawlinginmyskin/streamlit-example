@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 from sklearn.linear_model import LinearRegression
+import sklearn.metrics as metrics
 import numpy as np
 
 lozyska = {
@@ -32,6 +33,21 @@ ylim = {
 }
 
 
+tytuly = {
+	'przebieg': "Przebieg w danej godzinie",
+	'max_temp_przekladnie': "Maksymalna temperatura przekładni w danej godzinie",
+	'max_predkosc_osi': "Maksymalna prędkosć w danej godzinie",
+	'temp_zew': 'Temperatura zewnętrzna'
+}
+
+jednostki = {
+	'przebieg': 'km',
+	'max_temp_przekladnie': "°C",
+	'max_predkosc_osi': "km/h",
+	'temp_zew': '°C'
+}
+
+
 def wykres_y(y_test, preds, d, df_t, len_test=689):
 	d_count = 0
 	x_labels = []
@@ -52,23 +68,27 @@ def wykres_y(y_test, preds, d, df_t, len_test=689):
 		#plt.plot(x, x, alpha=0)
 		plt.xlim(0, 24)
 		plt.ylim(np.min(y_test.to_numpy())-3, np.max(y_test.to_numpy())+3)
+		plt.axhline(y=0, color='k', linestyle='--', alpha=0.5)
 		for i in range(d_count):
 			if i == 0:
 				plt.plot([x_labels[i], x_labels[i+1]], [y_test.loc[d_indices[i], n], y_test.loc[d_indices[i + 1], n]]
-				, 'ro-', label="pomiary rzeczywiste")
-				plt.plot([x_labels[i], x_labels[i+1]], [predykcja[i], predykcja[i+1]], 'bo-', label='predykcja')
-				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i]+3, predykcja[i + 1]+3], 'go-', label='bezpieczny przedzial')
-				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i] - 3, predykcja[i + 1] - 3], 'go-')
+				,'-.', color='black', label="pomiary rzeczywiste")
+				plt.plot([x_labels[i], x_labels[i+1]], [predykcja[i], predykcja[i+1]], 'bo-', linewidth=2, label='predykcja')
+				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i]+3, predykcja[i + 1]+3], 'g', label='przedział bezpieczny', linewidth=0)
+				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i] - 3, predykcja[i + 1] - 3], 'g', linewidth=0)
+				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i] + 5, predykcja[i + 1] + 5], color='orange', linewidth=0, label='przedział ostrzegawczy')
 			elif i != d_count-1:
 				plt.plot([x_labels[i], x_labels[i+1]], [y_test.loc[d_indices[i], n], y_test.loc[d_indices[i + 1], n]]
-				, 'ro-')
-				plt.plot([x_labels[i], x_labels[i+1]], [predykcja[i], predykcja[i+1]], 'bo-')
-				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i]+3, predykcja[i + 1]+3], 'go-')
-				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i] - 3, predykcja[i + 1] - 3], 'go-')
+				, '-.', color='black')
+				plt.plot([x_labels[i], x_labels[i+1]], [predykcja[i], predykcja[i+1]], 'bo-', linewidth=2)
+				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i]+3, predykcja[i + 1]+3], 'g', linewidth=0)
+				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i] - 3, predykcja[i + 1] - 3], 'g', linewidth=0)
 
 		plt.legend()
 		plt.ylabel('różnica między ' + lozyska[n] + ' a średnią BR1-CL2', fontsize=12)
 		plt.fill_between(x_labels, [i + 3 for i in predykcja], [i - 3 for i in predykcja], alpha=0.2, color='green')
+		plt.fill_between(x_labels, [i + 3 for i in predykcja], [i + 5 for i in predykcja], alpha=0.2, color='orange')
+		plt.fill_between(x_labels, [i - 3 for i in predykcja], [i - 5 for i in predykcja], alpha=0.2, color='orange')
 		plt.xticks(x, [str(i) + ':00' for i in x], rotation=45)
 	st.pyplot(fig)
 	return None
@@ -99,7 +119,30 @@ def wykres_x(x_test, df_t, d):
 				if i != d_count -1:
 					plt.plot([x_labels[i], x_labels[i+1]], [x_test.loc[d_indices[i], n], x_test.loc[d_indices[i+1], n]], 'o-', c='#1f77b4')
 			plt.xticks(x, [str(i) + ':00' for i in x], rotation=45)
-			plt.title(n + ' w dniu ' + d)
+			plt.ylabel(jednostki[n])
+			plt.title(tytuly[n])
+	st.pyplot(fig)
+	return None
+
+
+def wykres_avg(df_avg, df_t, d, len_test=689):
+	d_count = 0
+	x_labels = []
+	d_indices = []
+	for i, j in enumerate(df_t):
+		if j.split()[0] == d:
+			d_count += 1
+			x_labels.append(int(j.split()[1].split(':')[0]))
+			d_indices.append(i)
+	x = [i for i in range(24)]
+	fig = plt.figure(figsize=(15, 3))
+	plt.ylim(0, 70)
+	for i in range(d_count):
+		if i != d_count - 1:
+			plt.plot([x_labels[i], x_labels[i+1]], [df_avg.loc[i+len_test, 'avg_max_2_3'], df_avg.loc[i+len_test+1, 'avg_max_2_3']], 'o-',c='#1f77b4')
+	plt.xticks(x, [str(i) + ':00' for i in x], rotation=45)
+	plt.ylabel('°C')
+	plt.title('Przebieg średnich temperatur z wózków 2 i 3')
 	st.pyplot(fig)
 	return None
 
@@ -116,9 +159,12 @@ def obrobka_df(filename):
 		df.at[i, 'w4_przod_prawy'] -= j
 		df.at[i, 'w4_tyl_lewy'] -= j
 		df.at[i, 'w4_tyl_prawy'] -= j
-	
+	df_avg = df[['Data_czas', 'avg_max_2_3', 'przebieg']]
 	df = df.drop(['avg_max_2_3', 'kierunekA', 'max_temp_silnika'], axis=1)
 	df = df[df['przebieg'] > 5].reset_index(drop=True)
+	df_avg = df_avg[df_avg['przebieg'] > 5].reset_index(drop=True)
+	df_avg = df_avg.drop(['przebieg'], axis=1)
+	
 	df = df.dropna()
 	to_drop = []
 	for i, j in enumerate(df['temp_zew']):
@@ -165,10 +211,11 @@ def obrobka_df(filename):
 		else:
 			length += 1
 	
-	return x_train, x_test, y_train, y_test, time_slices, df_t
+	return x_train, x_test, y_train, y_test, time_slices, df_t, df_avg
 
 
 def load_models(x_train, y_train):
+	
 	return [LinearRegression().fit(x_train, y_train[i]) for i in y_train.columns]
 
 
@@ -181,7 +228,7 @@ def podsumowanie(x_test, y_test, regs):
 	podsumowanie = pd.DataFrame(columns=kolumny)
 	
 	for c, n in enumerate(y_test.columns):
-		row = [n]
+		row = [lozyska[n]]
 		for i, j in enumerate(x_test.columns.values):
 			row.append(round(regs[c].coef_[i], 3))
 		
