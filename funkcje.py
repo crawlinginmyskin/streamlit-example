@@ -85,14 +85,14 @@ def wykres_x(x_test, df_t, d):
 			d_indices.append(i)
 	x = [i for i in range(24)]
 
-	fig = plt.figure(figsize=(25, 10))
+	fig = plt.figure(figsize=(30, 5))
 	for c, n in enumerate(x_test.columns):
 		if n != 'kierunekB':
 			if c == 0:
-				plt.subplot(2, 2, 1)
+				plt.subplot(1, 4, 1)
 				plt.ylim(-10, 30)
 			else:
-				plt.subplot(2, 2, c)
+				plt.subplot(1, 4, c)
 				plt.ylim(0, ylim[n])
 			
 			for i in range(d_count):
