@@ -22,8 +22,28 @@ if data.day < 10:
 	data_str += '0'+str(data.day)
 else:
 	data_str += str(data.day)
+
+byla_jazda = False
+
 x_train, x_test, y_train, y_test, time_slices, df_t = obrobka_df('godziny.csv')
-regs = load_models(x_train, y_train)
-preds = [i.predict(x_test) for i in regs]
-wykres_y(y_test, preds, data_str, df_t)
-wykres_x(x_test, df_t, data_str)
+
+for i,j in enumerate(df_t):
+	if j.split()[0] == data_str:
+		byla_jazda = True
+		break
+
+if byla_jazda:
+	regs = load_models(x_train, y_train)
+	preds = [i.predict(x_test) for i in regs]
+	"""
+	Przewidywana różnica między temperaturą w łożysku przednim/tylnim, a średnią z łożysk środkowych w danym dniu września
+	na podstawie modelu wytrenowanego na danych z miesięcy kwiecień-sierpień
+	"""
+	wykres_y(y_test, preds, data_str, df_t)
+
+	"""
+	Przebieg zmiennych na podstawie których model dokonuje estymacji
+	"""
+	wykres_x(x_test, df_t, data_str)
+else:
+	st.write("Brak przejazdów w tym dniu")

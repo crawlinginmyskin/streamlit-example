@@ -12,8 +12,23 @@ lozyska = {
 	'w4_przod_lewy': 'DL1',
 	'w4_przod_prawy': 'DR1',
 	'w4_tyl_lewy': 'DL2',
-	'w4_tyl_prawy': 'DR2',
-	
+	'w4_tyl_prawy': 'DR2'
+}
+indeksy = {
+	'w1_przod_lewy': 5,
+	'w1_przod_prawy': 1,
+	'w1_tyl_lewy': 6,
+	'w1_tyl_prawy': 2,
+	'w4_przod_lewy': 7,
+	'w4_przod_prawy': 3,
+	'w4_tyl_lewy': 8,
+	'w4_tyl_prawy': 4
+}
+
+ylim = {
+	'przebieg': 50,
+	'max_temp_przekladnie': 90,
+	'max_predkosc_osi': 80
 }
 
 
@@ -24,23 +39,37 @@ def wykres_y(y_test, preds, d, df_t, len_test=689):
 	for i, j in enumerate(df_t):
 		if j.split()[0] == d:
 			d_count += 1
-			x_labels.append(j)
+			x_labels.append(int(j.split()[1].split(':')[0]))
 			d_indices.append(i)
-	x = [i for i in range(d_count)]
+	x = [i for i in range(24)]
 	preds = np.array(preds)
-	fig = plt.figure(figsize=(40, 45))
+	
+	fig = plt.figure(figsize=(30, 45))
 	for c, n in enumerate(y_test.columns):
 		predykcja = preds[c, d_indices[0]-len_test:d_indices[-1]-len_test+1]
-		plt.subplot(8, 2, 1+c)
+		plt.subplot(8, 4, indeksy[n])
 		plt.title(lozyska[n] + ' w dniu ' + d)
-		plt.plot(x, y_test.loc[d_indices[0]:d_indices[-1], n], 'ro-', label="pomiary rzeczywiste")
-		plt.plot(x, predykcja, 'o-', label="predykcja")
-		plt.plot(x, [i + 3 for i in predykcja], 'go--', label='bezpieczny przedział')
-		plt.plot(x, [i - 3 for i in predykcja], 'go--')
+		#plt.plot(x, x, alpha=0)
+		plt.xlim(0, 24)
+		plt.ylim(np.min(y_test.to_numpy())-3, np.max(y_test.to_numpy())+3)
+		for i in range(d_count):
+			if i == 0:
+				plt.plot([x_labels[i], x_labels[i+1]], [y_test.loc[d_indices[i], n], y_test.loc[d_indices[i + 1], n]]
+				, 'ro-', label="pomiary rzeczywiste")
+				plt.plot([x_labels[i], x_labels[i+1]], [predykcja[i], predykcja[i+1]], 'bo-', label='predykcja')
+				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i]+3, predykcja[i + 1]+3], 'go-', label='bezpieczny przedzial')
+				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i] - 3, predykcja[i + 1] - 3], 'go-')
+			elif i != d_count-1:
+				plt.plot([x_labels[i], x_labels[i+1]], [y_test.loc[d_indices[i], n], y_test.loc[d_indices[i + 1], n]]
+				, 'ro-')
+				plt.plot([x_labels[i], x_labels[i+1]], [predykcja[i], predykcja[i+1]], 'bo-')
+				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i]+3, predykcja[i + 1]+3], 'go-')
+				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i] - 3, predykcja[i + 1] - 3], 'go-')
+
 		plt.legend()
-		plt.ylabel('różnica między ' + lozyska[n] + ' a średnią BR1-CL2', fontsize=14)
-		plt.fill_between(x, [i + 3 for i in predykcja], [i - 3 for i in predykcja], alpha=0.3, color='green')
-		plt.xticks(x, df_t[d_indices[0]:d_indices[-1] + 1])
+		plt.ylabel('różnica między ' + lozyska[n] + ' a średnią BR1-CL2', fontsize=12)
+		plt.fill_between(x_labels, [i + 3 for i in predykcja], [i - 3 for i in predykcja], alpha=0.2, color='green')
+		plt.xticks(x, [str(i) + ':00' for i in x], rotation=45)
 	st.pyplot(fig)
 	return None
 
@@ -52,19 +81,24 @@ def wykres_x(x_test, df_t, d):
 	for i, j in enumerate(df_t):
 		if j.split()[0] == d:
 			d_count += 1
-			x_labels.append(j)
+			x_labels.append(int(j.split()[1].split(':')[0]))
 			d_indices.append(i)
-	x = [i for i in range(d_count)]
-	fig = plt.figure(figsize=(40, 20))
+	x = [i for i in range(24)]
+
+	fig = plt.figure(figsize=(25, 10))
 	for c, n in enumerate(x_test.columns):
 		if n != 'kierunekB':
 			if c == 0:
 				plt.subplot(2, 2, 1)
+				plt.ylim(-10, 30)
 			else:
 				plt.subplot(2, 2, c)
-			plt.plot(x, x_test.loc[d_indices[0]:d_indices[-1], n], 'o-', label=n)
-			plt.xticks(x, df_t[d_indices[0]:d_indices[-1] + 1])
-			plt.legend()
+				plt.ylim(0, ylim[n])
+			
+			for i in range(d_count):
+				if i != d_count -1:
+					plt.plot([x_labels[i], x_labels[i+1]], [x_test.loc[d_indices[i], n], x_test.loc[d_indices[i+1], n]], 'o-', c='#1f77b4')
+			plt.xticks(x, [str(i) + ':00' for i in x], rotation=45)
 			plt.title(n + ' w dniu ' + d)
 	st.pyplot(fig)
 	return None
@@ -141,7 +175,6 @@ def load_models(x_train, y_train):
 def podsumowanie(x_test, y_test, regs):
 	kolumny = ['łożyzko']
 	for i, j in enumerate(x_test.columns.values):
-		# print(regs[c].coef_[i], j)
 		kolumny.append(j)
 	
 	kolumny.append('r^2')
