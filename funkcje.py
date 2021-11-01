@@ -74,8 +74,8 @@ def wykres_y(y_test, preds, d, df_t, len_test=689):
 				plt.plot([x_labels[i], x_labels[i+1]], [y_test.loc[d_indices[i], n], y_test.loc[d_indices[i + 1], n]]
 				,'-.', color='black', label="pomiary rzeczywiste")
 				plt.plot([x_labels[i], x_labels[i+1]], [predykcja[i], predykcja[i+1]], 'bo-', linewidth=3, label='predykcja')
-				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i]+3, predykcja[i + 1]+3], 'g', label='przedział bezpieczny', linewidth=0)
-				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i] - 3, predykcja[i + 1] - 3], 'g', linewidth=0)
+				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i]+3, predykcja[i + 1]+3], 'g-', label='przedział bezpieczny', linewidth=0)
+				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i] - 3, predykcja[i + 1] - 3], 'g-', linewidth=0)
 				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i] + 5, predykcja[i + 1] + 5], color='orange', linewidth=0, label='przedział ostrzegawczy')
 			elif i != d_count-1:
 				plt.plot([x_labels[i], x_labels[i+1]], [y_test.loc[d_indices[i], n], y_test.loc[d_indices[i + 1], n]]
@@ -83,8 +83,10 @@ def wykres_y(y_test, preds, d, df_t, len_test=689):
 				plt.plot([x_labels[i], x_labels[i+1]], [predykcja[i], predykcja[i+1]], 'bo-', linewidth=3)
 				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i]+3, predykcja[i + 1]+3], 'g', linewidth=0)
 				plt.plot([x_labels[i], x_labels[i + 1]], [predykcja[i] - 3, predykcja[i + 1] - 3], 'g', linewidth=0)
-
-		plt.legend()
+		
+		leg = plt.legend()
+		for line in leg.get_lines():
+			line.set_linewidth(2.0)
 		plt.ylabel('różnica między ' + lozyska[n] + ' a średnią BR1-CL2', fontsize=12)
 		plt.fill_between(x_labels, [i + 3 for i in predykcja], [i - 3 for i in predykcja], alpha=0.2, color='green')
 		plt.fill_between(x_labels, [i + 3 for i in predykcja], [i + 5 for i in predykcja], alpha=0.2, color='orange')
