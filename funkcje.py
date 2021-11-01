@@ -2,41 +2,85 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 from sklearn.linear_model import LinearRegression
+import numpy as np
+
+lozyska = {
+	'w1_przod_lewy': 'AL1',
+	'w1_przod_prawy': 'AR1',
+	'w1_tyl_lewy': 'AL2',
+	'w1_tyl_prawy': 'AR2',
+	'w4_przod_lewy': 'DL1',
+	'w4_przod_prawy': 'DR1',
+	'w4_tyl_lewy': 'DL2',
+	'w4_tyl_prawy': 'DR2',
+	
+}
 
 
-def wykres1(y_test, preds, c, d, r):
-	x = list(range(len(y_test)))
-	fig = plt.figure(figsize=(20, 6))
-	plt.plot(x, y_test, 'ro-', label="pomiary rzeczywiste")
-	
-	plt.plot(x, preds, 'o-', label="predykcja")
-	
-	plt.plot(x, [i + 3 for i in preds], 'go--', label='bezpieczny przedzial')
-	plt.plot(x, [i - 3 for i in preds], 'go--')
-	plt.legend()
-	plt.title(c + ' ' + r + ' w dniu ' + d)
+def wykres_y(y_test, preds, d, df_t, len_test=689):
+	d_count = 0
+	x_labels = []
+	d_indices = []
+	for i, j in enumerate(df_t):
+		if j.split()[0] == d:
+			d_count += 1
+			x_labels.append(j)
+			d_indices.append(i)
+	x = [i for i in range(d_count)]
+	preds = np.array(preds)
+	fig = plt.figure(figsize=(40, 45))
+	for c, n in enumerate(y_test.columns):
+		predykcja = preds[c, d_indices[0]-len_test:d_indices[-1]-len_test+1]
+		plt.subplot(8, 2, 1+c)
+		plt.title(lozyska[n] + ' w dniu ' + d)
+		plt.plot(x, y_test.loc[d_indices[0]:d_indices[-1], n], 'ro-', label="pomiary rzeczywiste")
+		plt.plot(x, predykcja, 'o-', label="predykcja")
+		plt.plot(x, [i + 3 for i in predykcja], 'go--', label='bezpieczny przedział')
+		plt.plot(x, [i - 3 for i in predykcja], 'go--')
+		plt.legend()
+		plt.ylabel('różnica między ' + lozyska[n] + ' a średnią BR1-CL2', fontsize=14)
+		plt.fill_between(x, [i + 3 for i in predykcja], [i - 3 for i in predykcja], alpha=0.3, color='green')
+		plt.xticks(x, df_t[d_indices[0]:d_indices[-1] + 1])
 	st.pyplot(fig)
 	return None
 
 
-def wykres2(y_test, preds, c, d, r):
-	x = list(range(len(y_test)))
-	y_p = y_test.reset_index()
-	fig = plt.figure(figsize=(20, 6))
-	plt.scatter(x, y_test, label="pomiary rzeczywiste")
-	
-	plt.scatter(x, preds, label="predykcja")
-	for i in x:
-		plt.plot((i, i), (preds[i], y_p.at[i, c]), c='black')
-	plt.legend()
-	plt.title(c + ' ' + r + ' w dniu ' + d)
+def wykres_x(x_test, df_t, d):
+	d_count = 0
+	x_labels = []
+	d_indices = []
+	for i, j in enumerate(df_t):
+		if j.split()[0] == d:
+			d_count += 1
+			x_labels.append(j)
+			d_indices.append(i)
+	x = [i for i in range(d_count)]
+	fig = plt.figure(figsize=(40, 20))
+	for c, n in enumerate(x_test.columns):
+		if n != 'kierunekB':
+			if c == 0:
+				plt.subplot(2, 2, 1)
+			else:
+				plt.subplot(2, 2, c)
+			plt.plot(x, x_test.loc[d_indices[0]:d_indices[-1], n], 'o-', label=n)
+			plt.xticks(x, df_t[d_indices[0]:d_indices[-1] + 1])
+			plt.legend()
+			plt.title(n + ' w dniu ' + d)
 	st.pyplot(fig)
 	return None
-
-
 def obrobka_df(filename):
 	# doprowadzenie df do plottable wersji
 	df = pd.read_csv(filename, index_col=0)
+	for i, j in enumerate(df['avg_max_2_3']):
+		df.at[i, 'w1_przod_lewy'] -= j
+		df.at[i, 'w1_przod_prawy'] -= j
+		df.at[i, 'w1_tyl_lewy'] -= j
+		df.at[i, 'w1_tyl_prawy'] -= j
+		df.at[i, 'w4_przod_lewy'] -= j
+		df.at[i, 'w4_przod_prawy'] -= j
+		df.at[i, 'w4_tyl_lewy'] -= j
+		df.at[i, 'w4_tyl_prawy'] -= j
+	
 	df = df.drop(['avg_max_2_3', 'kierunekA', 'max_temp_silnika'], axis=1)
 	df = df[df['przebieg'] > 5].reset_index(drop=True)
 	df = df.dropna()
@@ -85,11 +129,12 @@ def obrobka_df(filename):
 		else:
 			length += 1
 	
-	return x_train, x_test, y_train, y_test, time_slices
+	return x_train, x_test, y_train, y_test, time_slices, df_t
 
 
 def load_models(x_train, y_train):
 	return [LinearRegression().fit(x_train, y_train[i]) for i in y_train.columns]
+
 
 
 def podsumowanie(x_test, y_test, regs):
@@ -110,11 +155,3 @@ def podsumowanie(x_test, y_test, regs):
 		podsumowanie = podsumowanie.append(pd.DataFrame([row], columns=kolumny))
 	podsumowanie = podsumowanie.reset_index(drop=True)
 	return podsumowanie
-
-
-def rysuj(y_test, preds, d, time_slices):
-	for c, n in enumerate(y_test.columns):
-		for i, j in enumerate(time_slices):
-			if j[0] == d:
-				wykres1(y_test.loc[j[1]:j[2], n], preds[c][j[3]:j[4] + 1], n, j[0], 'regresja liniowa')
-				wykres2(y_test.loc[j[1]:j[2], n], preds[c][j[3]:j[4] + 1], n, j[0], 'regresja liniowa')
