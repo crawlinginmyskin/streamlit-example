@@ -139,6 +139,8 @@ def wykres_avg(df_avg, df_t, d, len_test=689):
 	x = [i for i in range(24)]
 	fig = plt.figure(figsize=(15, 3))
 	plt.ylim(0, 70)
+	for i in range(0, 70, 10):
+		plt.axhline(y=i, color='k', linestyle='--', alpha=0.5)
 	for i in range(d_count):
 		if i != d_count - 1:
 			plt.plot([x_labels[i], x_labels[i+1]], [df_avg.loc[i+len_test, 'avg_max_2_3'], df_avg.loc[i+len_test+1, 'avg_max_2_3']], 'o-',c='#1f77b4')
