@@ -37,7 +37,8 @@ tytuly = {
 	'przebieg': "Przebieg w danej godzinie",
 	'max_temp_przekladnie': "Maksymalna temperatura przekładni w danej godzinie",
 	'max_predkosc_osi': "Maksymalna prędkosć w danej godzinie",
-	'temp_zew': 'Temperatura zewnętrzna'
+	'temp_zew': 'Temperatura zewnętrzna',
+	'kierunekB': 'Kierunek w którym jechał tramwaj'
 }
 
 jednostki = {
@@ -123,6 +124,7 @@ def wykres_x(x_test, df_t, d):
 			plt.xticks(x, [str(i) + ':00' for i in x], rotation=45)
 			plt.ylabel(jednostki[n])
 			plt.title(tytuly[n])
+			
 	st.pyplot(fig)
 	return None
 
@@ -164,8 +166,9 @@ def obrobka_df(filename):
 		df.at[i, 'w4_tyl_lewy'] -= j
 		df.at[i, 'w4_tyl_prawy'] -= j
 	df_avg = df[['Data_czas', 'avg_max_2_3', 'przebieg']]
-	df = df.drop(['avg_max_2_3', 'kierunekA', 'max_temp_silnika'], axis=1)
 	df = df[df['przebieg'] > 5].reset_index(drop=True)
+	a_b = policz_kierunek(df)
+	df = df.drop(['avg_max_2_3', 'kierunekA', 'max_temp_silnika'], axis=1)
 	df_avg = df_avg[df_avg['przebieg'] > 5].reset_index(drop=True)
 	df_avg = df_avg.drop(['przebieg'], axis=1)
 	
@@ -215,7 +218,7 @@ def obrobka_df(filename):
 		else:
 			length += 1
 	
-	return x_train, x_test, y_train, y_test, time_slices, df_t, df_avg
+	return x_train, x_test, y_train, y_test, time_slices, df_t, df_avg, a_b
 
 
 def load_models(x_train, y_train):
@@ -224,9 +227,9 @@ def load_models(x_train, y_train):
 
 
 def podsumowanie(x_test, y_test, regs):
-	kolumny = ['łożyzko']
+	kolumny = ['łożysko']
 	for i, j in enumerate(x_test.columns.values):
-		kolumny.append(j)
+		kolumny.append(tytuly[j])
 	
 	kolumny.append('r^2')
 	podsumowanie = pd.DataFrame(columns=kolumny)
@@ -240,3 +243,22 @@ def podsumowanie(x_test, y_test, regs):
 		podsumowanie = podsumowanie.append(pd.DataFrame([row], columns=kolumny))
 	podsumowanie = podsumowanie.reset_index(drop=True)
 	return podsumowanie
+
+
+def policz_kierunek(df):
+	a_b = [0, 0]
+	for i,j in enumerate(df['kierunekA']):
+		if j == 1:
+			a_b[0] += 1
+		if df.at[i, 'kierunekB'] == 1:
+			a_b[1] +=1
+	return a_b
+
+
+def wykres_kierunek(a_b):
+	fig = plt.figure(figsize=(15,3))
+	plt.bar(['A', 'B'], a_b, color=['#1f77b4', 'orange'])
+	plt.title(tytuly['kierunekB'])
+	plt.legend()
+	st.pyplot(fig)
+	return None

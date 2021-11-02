@@ -1,6 +1,6 @@
 import datetime as dt
 import streamlit as st
-from funkcje import obrobka_df, load_models, podsumowanie, wykres_y, wykres_x, wykres_avg
+from funkcje import obrobka_df, load_models, podsumowanie, wykres_y, wykres_x, wykres_avg, wykres_kierunek
 from PIL import Image
 
 st.set_page_config(layout='wide')
@@ -33,7 +33,7 @@ else:
 
 byla_jazda = False
 
-x_train, x_test, y_train, y_test, time_slices, df_t, df_avg = obrobka_df('godziny.csv')
+x_train, x_test, y_train, y_test, time_slices, df_t, df_avg, a_b = obrobka_df('godziny.csv')
 
 for i, j in enumerate(df_t):
 	if j.split()[0] == data_str:
@@ -57,9 +57,12 @@ if byla_jazda:
 	Przebieg średniej temperatury z wózków BL1-CR2, od której to różnicę przewidujemy naszym modelem
 	"""
 	wykres_avg(df_avg, df_t, data_str)
+	wykres_kierunek(a_b)
 	"""
-	Podsumowanie współczynników regresji dla każdego łożyska + wynik r^2
+	Podsumowanie współczynników regresji dla każdego łożyska + wynik r^2 (miara dopasowania modelu do danych)
 	"""
 	st.write(podsumowanie(x_test, y_test, regs))
+	
 else:
 	st.write("Brak przejazdów w tym dniu")
+
