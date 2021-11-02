@@ -58,7 +58,7 @@ if byla_jazda:
 	"""
 	wykres_avg(df_avg, df_t, data_str)
 	"""
-	Stosunek kierunków, w których przebieg tramwajów był większy niż 5 km
+	Stosunek kierunków, w których przebieg godzinowy tramwajów był większy niż 5 km w okresie kwiecien-wrzesien
 	"""
 	wykres_kierunek(a_b)
 	"""
