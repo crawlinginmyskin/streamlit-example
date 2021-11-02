@@ -57,6 +57,9 @@ if byla_jazda:
 	Przebieg średniej temperatury z wózków BL1-CR2, od której to różnicę przewidujemy naszym modelem
 	"""
 	wykres_avg(df_avg, df_t, data_str)
+	"""
+	Stosunek kierunków, w których przebieg tramwajów był większy niż 5 km
+	"""
 	wykres_kierunek(a_b)
 	"""
 	Podsumowanie współczynników regresji dla każdego łożyska + wynik r^2 (miara dopasowania modelu do danych)
