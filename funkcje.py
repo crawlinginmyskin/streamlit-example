@@ -112,19 +112,39 @@ def wykres_x(x_test, df_t, d):
 	for c, n in enumerate(x_test.columns):
 		if n != 'kierunekB':
 			if c == 0:
-				plt.subplot(1, 4, 1)
+				plt.subplot(1, 5, 1)
 				plt.ylim(-10, 30)
 			else:
-				plt.subplot(1, 4, c)
+				plt.subplot(1, 5, c)
 				plt.ylim(0, ylim[n])
 			
 			for i in range(d_count):
-				if i != d_count -1:
+				if i != d_count - 1:
 					plt.plot([x_labels[i], x_labels[i+1]], [x_test.loc[d_indices[i], n], x_test.loc[d_indices[i+1], n]], 'o-', c='#1f77b4')
 			plt.xticks(x, [str(i) + ':00' for i in x], rotation=45)
 			plt.ylabel(jednostki[n])
 			plt.title(tytuly[n])
+		else:
+			plt.subplot(1,5,5)
+			plt.ylim(-1.5, 1.5)
+			plt.title(tytuly[n])
+			to_plot = []
+			for i in range(d_count):
+				if x_test.loc[d_indices[i], n] == 0:
+					to_plot.append(1)
+				else:
+					to_plot.append(-1)
+			for i in range(d_count):
+				if i != d_count - 1:
+					plt.plot([x_labels[i], x_labels[i+1]], [to_plot[i], to_plot[i+1]], c='#1f77b4')
 			
+			for i in range(d_count):
+				plt.plot([x_labels[i], x_labels[i]],  [to_plot[i], 0], c='black')
+				plt.scatter(x_labels[i], to_plot[i], c='black')
+			
+			plt.axhline(y=0, color='k', linestyle='--', alpha=0.5)
+			plt.xticks(x, [str(i) + ':00' for i in x], rotation=45)
+			plt.yticks([-1, 0, 1], ['wózek A\nz tyłu', '0', 'wózek A\nz przodu'], rotation=45)
 	st.pyplot(fig)
 	return None
 

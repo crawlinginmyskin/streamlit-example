@@ -57,14 +57,13 @@ if byla_jazda:
 	Przebieg średniej temperatury z wózków BL1-CR2, od której to różnicę przewidujemy naszym modelem
 	"""
 	wykres_avg(df_avg, df_t, data_str)
-	"""
-	Stosunek kierunków, w których przebieg godzinowy tramwajów był większy niż 5 km w okresie kwiecien-wrzesien
-	"""
-	wykres_kierunek(a_b)
+
 	"""
 	Podsumowanie współczynników regresji dla każdego łożyska + wynik r^2 (miara dopasowania modelu do danych)
 	"""
 	st.write(podsumowanie(x_test, y_test, regs))
+	
+	st.write("metodologia opracowania modelu [link](https://docs.google.com/presentation/d/19SkSF6WnEuGmVQNwRAMcyPjQeVMGxQ3nIgM2y5akBgA/edit?usp=sharing)")
 	
 else:
 	st.write("Brak przejazdów w tym dniu")
