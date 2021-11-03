@@ -169,8 +169,8 @@ def wykres_avg(df_avg, df_t, d, len_test=689):
 	plt.xticks(x, [str(i) + ':00' for i in x], rotation=45)
 	plt.ylabel('°C')
 	plt.title('Przebieg średnich temperatur z wózków 2 i 3')
-	st.pyplot(fig)
-	return None
+	#st.pyplot(fig)
+	return fig
 
 
 def obrobka_df(filename):
