@@ -4,6 +4,7 @@ import streamlit as st
 from sklearn.linear_model import LinearRegression
 import sklearn.metrics as metrics
 import numpy as np
+import pickle
 
 lozyska = {
 	'w1_przod_lewy': 'AL1',
@@ -187,7 +188,6 @@ def obrobka_df(filename):
 		df.at[i, 'w4_tyl_prawy'] -= j
 	df_avg = df[['Data_czas', 'avg_max_2_3', 'przebieg']]
 	df = df[df['przebieg'] > 5].reset_index(drop=True)
-	a_b = policz_kierunek(df)
 	df = df.drop(['avg_max_2_3', 'kierunekA', 'max_temp_silnika'], axis=1)
 	df_avg = df_avg[df_avg['przebieg'] > 5].reset_index(drop=True)
 	df_avg = df_avg.drop(['przebieg'], axis=1)
@@ -238,12 +238,18 @@ def obrobka_df(filename):
 		else:
 			length += 1
 	
-	return x_train, x_test, y_train, y_test, time_slices, df_t, df_avg, a_b
+	return x_train, x_test, y_train, y_test, time_slices, df_t, df_avg
 
 
-def load_models(x_train, y_train):
-	
-	return [LinearRegression().fit(x_train, y_train[i]) for i in y_train.columns]
+def load_models(is_rf):
+	test = []
+	if is_rf:
+		for i in range(8):
+			test.append(pickle.load(open('rf_' + str(i) + '.sav', 'rb')))
+	else:
+		for i in range(8):
+			test.append(pickle.load(open(str(i) + '.sav', 'rb')))
+	return test
 
 
 def podsumowanie(x_test, y_test, regs):
@@ -265,20 +271,3 @@ def podsumowanie(x_test, y_test, regs):
 	return podsumowanie
 
 
-def policz_kierunek(df):
-	a_b = [0, 0]
-	for i,j in enumerate(df['kierunekA']):
-		if j == 1:
-			a_b[0] += 1
-		if df.at[i, 'kierunekB'] == 1:
-			a_b[1] +=1
-	return a_b
-
-
-def wykres_kierunek(a_b):
-	fig = plt.figure(figsize=(15,3))
-	plt.bar(['A', 'B'], a_b, color=['#1f77b4', 'orange'])
-	plt.title(tytuly['kierunekB'])
-	plt.legend()
-	st.pyplot(fig)
-	return None

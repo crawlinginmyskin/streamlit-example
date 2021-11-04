@@ -1,0 +1,5 @@
+rf albo regresja  wybor
+shapy do rf
+lokalne pliki
+dla 5 latka prezentacja
+chowanie wykresow
