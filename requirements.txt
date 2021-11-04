@@ -2,3 +2,6 @@ pandas
 streamlit
 matplotlib
 sklearn
+shap
+pickle
+joblib

@@ -1,12 +1,10 @@
 import shap
 import matplotlib.pyplot as plt
-import numba
 import pandas as pd
 import streamlit as st
 import numpy as np
 import pickle
 import joblib
-import dill
 
 lozyska = {
 	'w1_przod_lewy': 'AL1',

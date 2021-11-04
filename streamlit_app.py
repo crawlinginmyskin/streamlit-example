@@ -11,16 +11,16 @@ st.set_page_config(layout='wide')
 
 
 
-#tramwaj = Image.open('tramwaj.png')
-#gait = Image.open('gait.png')
-#id = Image.open('id.png')
+tramwaj = Image.open('tramwaj.png')
+gait = Image.open('gait.png')
+id = Image.open('id.png')
 col1, col2, col3 = st.columns([1, 3, 1])
 col1.title(" ")
 col2.title("Rozkład wózków w tramwaju")
 col3.title(" ")
-#col1.image(id, use_column_width=True)
-#col2.image(tramwaj, use_column_width=True)
-#col3.image(gait,use_column_width=True)
+col1.image(id, use_column_width=True)
+col2.image(tramwaj, use_column_width=True)
+col3.image(gait,use_column_width=True)
 data = st.date_input('Wybierz dzień do obserwacji', value=dt.date(2021, 9, 1), min_value=dt.date(2021, 9, 1),
 	                    max_value=dt.date(2021,9,30))
 
