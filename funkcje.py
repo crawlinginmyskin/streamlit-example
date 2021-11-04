@@ -272,13 +272,14 @@ def podsumowanie(x_test, y_test, regs):
 	return podsumowanie
 
 
-
 def rysuj_shapy(y_test, x_test, rf_regs):
 	fig = plt.figure(figsize=(50, 60))
+	x_t = x_test.copy()
+	x_t = x_t.rename(columns={'kierunekB': 'kierunek_A_z_przodu'})
 	for c, n in enumerate(y_test.columns):
 		plt.subplot(8, 4, indeksy[n])
-		explainer = shap.TreeExplainer(rf_regs[c], x_test)
-		shap_values = explainer(x_test, check_additivity=False)
+		explainer = shap.TreeExplainer(rf_regs[c], x_t)
+		shap_values = explainer(x_t, check_additivity=False)
 		shap.initjs()
 		shap.plots.beeswarm(shap_values, plot_size=None, show=False)
 		plt.title(lozyska[n])
@@ -293,16 +294,35 @@ def rysuj_waterfall(x_test, y_test, time_slices, regs, data_str, n):
 	c1,c2,c3,c4 = st.columns([1,1,1,1])
 	c5,c6,c7,c8 = st.columns([1,1,1,1])
 	kolumny = [c1,c2,c3,c4,c5,c6,c7,c8]
+	x_t = x_test.copy()
+	x_t = x_t.rename(columns={'kierunekB': 'kierunek_A_z_przodu'})
 	for i, j in enumerate(time_slices):
 		if j[0] == data_str:
 			day_start_end = time_slices[i][1:]
 	for c, d in enumerate(y_test.columns):
 		fig = plt.figure(figsize=(1, 1))
-		explainer = shap.TreeExplainer(regs[c], x_test)
-		shap_values = explainer(x_test, check_additivity=False)
+		explainer = shap.TreeExplainer(regs[c], x_t)
+		shap_values = explainer(x_t, check_additivity=False)
 		shap.initjs()
 		shap.plots.waterfall(shap_values[day_start_end[2] + n - 1])
 		plt.title(lozyska[d])
 		kolumny[indeksy[d]-1].pyplot(fig)
 		
+	return None
+
+
+def rysuj_barplot(x_test, y_test, regs):
+	c1, c2, c3, c4 = st.columns([1, 1, 1, 1])
+	c5, c6, c7, c8 = st.columns([1, 1, 1, 1])
+	kolumny = [c1, c2, c3, c4, c5, c6, c7, c8]
+	x_t = x_test.copy()
+	x_t = x_t.rename(columns={'kierunekB': 'kierunek_A_z_przodu'})
+	for c, d in enumerate(y_test.columns):
+		fig = plt.figure(figsize=(1, 1))
+		explainer = shap.TreeExplainer(regs[c], x_t)
+		shap_values = explainer(x_t, check_additivity=False)
+		shap.initjs()
+		shap.plots.bar(shap_values)
+		plt.title(lozyska[d])
+		kolumny[indeksy[d] - 1].pyplot(fig)
 	return None

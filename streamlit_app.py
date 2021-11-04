@@ -1,6 +1,6 @@
 import datetime as dt
 import streamlit as st
-from funkcje import obrobka_df, load_models, podsumowanie, wykres_y, wykres_x, wykres_avg, rysuj_shapy, rysuj_waterfall
+from funkcje import obrobka_df, load_models, podsumowanie, wykres_y, wykres_x, wykres_avg, rysuj_shapy, rysuj_waterfall, rysuj_barplot
 from PIL import Image
 
 st.set_page_config(layout='wide')
@@ -57,7 +57,7 @@ if byla_jazda and choice is not None:
 	preds = [i.predict(x_test) for i in regs]
 	with st.expander("Wykresy Y"):
 		"""
-		Przewidywana różnica między temperaturą w łożysku przednim/tylnim, a średnią z łożysk środkowych w danym dniu września
+		Przewidywana różnica między temperaturą w łożysku przednim/tylnym, a średnią z łożysk środkowych w danym dniu września
 		na podstawie modelu wytrenowanego na danych z miesięcy kwiecień-sierpień. Bezpieczny przedział to +- 3°C, a przedział ostrzegawczy to +- 2°C
 		"""
 		wykres_y(y_test, preds, data_str, df_t)
@@ -81,15 +81,20 @@ if byla_jazda and choice is not None:
 		"""
 		st.write(podsumowanie(x_test, y_test, regs))
 	else:
-		rysuj_shapy(y_test, x_test, regs)
+		with st.expander("Wykresy dla całego zbioru testowego"):
+			"""
+			Jak bardzo poszczególne dane wejściowe mają wpływ na ogół modelu
+			"""
+			rysuj_barplot(x_test, y_test, regs)
 		with st.expander("Wykresy dla poszczególnych obserwacji"):
 			"""
-			W jaki sposób poszczególne dane wejściowe mają wpływ na predykcje modelu
+			Jak bardzo poszczególne dane wejściowe mają wpływ na pojedyncza decyzje
 			"""
 			
 			ilosc = time_slices[0][4] - time_slices[0][3] + 1
 			n = st.slider('wybierz obserwację do analizy', 1, ilosc, 1)
 			rysuj_waterfall(x_test, y_test, time_slices, regs, data_str,  n)
+		rysuj_shapy(y_test, x_test, regs)
 	st.write("metodologia opracowania modelu [link](https://docs.google.com/presentation/d/19SkSF6WnEuGmVQNwRAMcyPjQeVMGxQ3nIgM2y5akBgA/edit?usp=sharing)")
 	
 else:
