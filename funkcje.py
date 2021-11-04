@@ -1,10 +1,12 @@
+import shap
 import matplotlib.pyplot as plt
+import numba
 import pandas as pd
 import streamlit as st
-from sklearn.linear_model import LinearRegression
-import sklearn.metrics as metrics
 import numpy as np
 import pickle
+import joblib
+import dill
 
 lozyska = {
 	'w1_przod_lewy': 'AL1',
@@ -271,3 +273,33 @@ def podsumowanie(x_test, y_test, regs):
 	return podsumowanie
 
 
+def rysuj_shapy(y_test, x_test, rf_regs):
+	fig = plt.figure(figsize=(50, 60))
+	for c, n in enumerate(y_test.columns):
+		plt.subplot(8, 4, indeksy[n])
+		explainer = joblib.load(filename='exp_' + str(c) + '.bz2')
+		shap_values = explainer(x_test, check_additivity=False)
+		shap.initjs()
+		shap.plots.beeswarm(shap_values, plot_size=None, show=False)
+		plt.title(lozyska[n])
+		
+	st.pyplot(fig)
+	return None
+
+
+def rysuj_waterfall(x_test, y_test, time_slices, regs, data_str, n):
+	day_start_end = [0, 0, 0, 0]
+	fig = plt.figure(figsize=(50, 60))
+	for i, j in enumerate(time_slices):
+		if j[0] == data_str:
+			day_start_end = time_slices[i][1:]
+	for c, d in enumerate(y_test.columns):
+		plt.subplot(8, 4, indeksy[d])
+		explainer = shap.TreeExplainer(regs[c], x_test)
+		shap_values = explainer(x_test, check_additivity=False)
+		shap.initjs()
+		shap.waterfall_plot(shap_values[day_start_end[2] + n - 1])
+		plt.title(lozyska[d])
+	
+	st.pyplot(fig)
+	return None
