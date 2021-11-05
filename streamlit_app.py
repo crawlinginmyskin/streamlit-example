@@ -95,7 +95,7 @@ if byla_jazda and choice is not None:
 			
 			ilosc = time_slices[0][4] - time_slices[0][3] + 1
 			test =(j.split()[1] for i, j in enumerate(df_t) if j.split()[0] == data_str)
-			n = st.slider('Wybierz obserwację do analizy', time(test_t[0].hour), time(test_t[-1].hour), time(test_t[0].hour), step=timedelta(minutes=60))
+			n = st.slider('Wybierz obserwację do analizy', time(test_t[0].hour-1), time(test_t[-1].hour-1), time(test_t[0].hour-1), step=timedelta(minutes=60))
 			st.write("tego dnia odczyty nastąpiły w tych godzinach: ")
 			for i in test_t:
 				st.write(i)
