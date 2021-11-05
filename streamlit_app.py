@@ -24,13 +24,13 @@ col3.image(gait,use_column_width=True)
 data = st.date_input('Wybierz dzień do obserwacji', value=dt.date(2021, 9, 1), min_value=dt.date(2021, 9, 1),
 	                    max_value=dt.date(2021,9,30))
 
-choice = st.radio('wybierz model: ', ('regresja liniowa', 'random forrest'))
+choice = st.radio('wybierz model: ', ('regresja liniowa', 'random forest'))
 
 is_rf = False
 
 if choice == 'regresji liniowej':
 	is_rf = False
-elif choice == 'random forrest':
+elif choice == 'random forest':
 	is_rf = True
 
 data_str = str(data.year) + '-'
